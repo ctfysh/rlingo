@@ -34,7 +34,8 @@ writeLingo=function(datalist,ldt="lingo.txt"){
     d1=lapply(datalist,t)
     d2=lapply(1:length(d1),function(x) paste(d1[[x]],collapse=","))
     d3=unlist(paste(d2,"~",sep=""))
-    writeLines(d3,ldt)
+    d4=gsub(" ","",d3)
+    writeLines(d4,ldt)
 }
 
 #' Extract Lingo Results
@@ -85,13 +86,15 @@ extractLingo=function(res){
     if(length(ind)){
         end=min(blank[blank>ind])-1
         res1=gsub("^\\s+","",res[ind:end])
-        res1=gsub("\\s{2,}"," ",res1)
-        res1=gsub("[()]","",res1)
-        ans$price=t(as.data.frame(strsplit(res1," ")))
+        res1=gsub("\\s{2,}",",",res1)
+        res1=gsub(" ","",res1)
+        ans$price=t(as.data.frame(strsplit(res1,",")))
+        ans$price=data.frame(ans$price)
         rownames(ans$price)=NULL
         colnames(ans$price)=c("row","slack.surplus",
                               "dual.price")[1:(nvar-1)]
-        ans$price=apply(ans$price,2,as.numeric)
+        for(i in 2:dim(ans$price)[2])
+            ans$price[,i]=as.numeric(ans$price[,i])
     }else{
         ans$price=numeric(0)
     }    
